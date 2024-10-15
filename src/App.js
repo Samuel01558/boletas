@@ -9,10 +9,10 @@ import UserBoletas from './components/UserBoletas';
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isRegister, setIsRegister] = useState(false);
-  const [userRole, setUserRole] = useState(''); // 'admin' o 'user'
+  const [userRole, setUserRole] = useState(''); 
 
   const handleLogin = (username, password) => {
-    // Lógica para manejar inicio de sesión
+    
     if (username === 'admin' && password === 'admin123') {
       setIsLoggedIn(true);
       setUserRole('admin');
@@ -25,9 +25,8 @@ function App() {
   };
 
   const handleRegister = (username, email, password) => {
-    // Lógica para manejar el registro
     alert(`Usuario ${username} registrado con éxito`);
-    setIsRegister(false); // Volver a la página de inicio de sesión después del registro
+    setIsRegister(false); 
   };
 
   const handleLogout = () => {

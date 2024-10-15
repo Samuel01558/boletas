@@ -1,18 +1,45 @@
-import React from 'react';
+function BoletaDetails({ boleta }) {
+    const [newComment, setNewComment] = useState('');
+    const [rating, setRating] = useState(1);
 
-const Home = () => {
-  return (
-    <div className="home-container p-6 bg-gray-100 min-h-screen">
-      <h1 className="text-3xl font-bold text-center mb-8">Eventos Disponibles</h1>
-      <div className="event-list space-y-6">
-        <div className="event-item bg-white p-6 rounded-lg shadow-md">
-          <h2 className="event-title text-2xl font-semibold">Concierto de Rock</h2>
-          <p className="text-gray-600">Fecha: 2024-10-25 - Ubicación: Ciudad XYZ</p>
-          <p className="mt-2">Una noche increíble con las mejores bandas de rock.</p>
+    const handleAddComment = () => {
+        fetch(`/api/boletas/${boleta._id}/comentarios`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username: 'UsuarioDemo', comentario: newComment, puntuacion: rating })
+        })
+        .then(response => response.json())
+        .then(updatedBoleta => {
+            // Actualizar la UI con la boleta actualizada
+        });
+    };
+
+    return (
+        <div>
+            <h3>{boleta.title}</h3>
+            <p>{boleta.date} - {boleta.location}</p>
+            <p>{boleta.description}</p>
+
+            <div>
+                <h4>Comentarios</h4>
+                {boleta.comentarios.map((comentario, index) => (
+                    <div key={index}>
+                        <p><strong>{comentario.username}</strong>: {comentario.comentario} - {comentario.puntuacion}/5</p>
+                    </div>
+                ))}
+
+                <div>
+                    <textarea value={newComment} onChange={e => setNewComment(e.target.value)} placeholder="Escribe tu comentario"></textarea>
+                    <select value={rating} onChange={e => setRating(e.target.value)}>
+                        <option value={1}>1</option>
+                        <option value={2}>2</option>
+                        <option value={3}>3</option>
+                        <option value={4}>4</option>
+                        <option value={5}>5</option>
+                    </select>
+                    <button onClick={handleAddComment}>Agregar Comentario</button>
+                </div>
+            </div>
         </div>
-      </div>
-    </div>
-  );
-};
-
-export default Home;
+    );
+}

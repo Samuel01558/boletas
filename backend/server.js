@@ -62,6 +62,28 @@ async function run() {
   } catch (error) {
     console.error("Error conectando a MongoDB:", error);
   }
+
+  app.post('/api/boletas/:id/comentarios', (req, res) => {
+    const { id } = req.params;
+    const { username, comentario, puntuacion } = req.body;
+
+    Boleta.findById(id)
+        .then(boleta => {
+            if (!boleta) {
+                return res.status(404).json({ message: 'Boleta no encontrada' });
+            }
+
+            boleta.comentarios.push({ username, comentario, puntuacion });
+            return boleta.save();
+        })
+        .then(updatedBoleta => {
+            res.json(updatedBoleta);
+        })
+        .catch(err => {
+            console.error(err);
+            res.status(500).json({ message: 'Error al agregar comentario' });
+        });
+});
 }
 
 run().catch(console.error);
