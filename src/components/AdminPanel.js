@@ -11,6 +11,7 @@ const AdminPanel = () => {
         description: '',
         price: 0,
     });
+    const [editingBoletaId, setEditingBoletaId] = useState(null);
 
     useEffect(() => {
         fetchBoletas();
@@ -49,6 +50,7 @@ const AdminPanel = () => {
             if (!response.ok) {
                 throw new Error('Error adding boleta');
             }
+            setNewBoleta({ title: '', date: '', location: '', description: '', price: 0 }); // Reset form
             fetchBoletas(); // Actualiza la lista de boletas después de agregar
         } catch (error) {
             setError(error.message);
@@ -71,21 +73,31 @@ const AdminPanel = () => {
     };
 
     const handleEditBoleta = async (id) => {
-        try {
-            const response = await fetch(`http://localhost:5001/api/boletas/${id}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(newBoleta),
-            });
+        if (editingBoletaId) {
+            // Editar una boleta existente
+            try {
+                const response = await fetch(`http://localhost:5001/api/boletas/${editingBoletaId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(newBoleta),
+                });
 
-            if (!response.ok) {
-                throw new Error('Error editing boleta');
+                if (!response.ok) {
+                    throw new Error('Error editing boleta');
+                }
+                setEditingBoletaId(null); // Reset editing state
+                setNewBoleta({ title: '', date: '', location: '', description: '', price: 0 }); // Reset form
+                fetchBoletas(); // Actualiza la lista de boletas después de editar
+            } catch (error) {
+                setError(error.message);
             }
-            fetchBoletas(); // Actualiza la lista de boletas después de editar
-        } catch (error) {
-            setError(error.message);
+        } else {
+            // Cargar la boleta en el formulario
+            const boleta = boletas.find(b => b._id === id);
+            setNewBoleta(boleta);
+            setEditingBoletaId(id);
         }
     };
 
@@ -95,7 +107,7 @@ const AdminPanel = () => {
     return (
         <div className="container mx-auto px-4 py-8">
             <h1 className="text-3xl font-bold mb-8">Panel de Administración</h1>
-            <h2 className="text-2xl font-bold mb-4">Agregar Nueva Boleta</h2>
+            <h2 className="text-2xl font-bold mb-4">Agregar / Editar Boleta</h2>
             <div className="mb-6">
                 <input
                     type="text"
@@ -136,8 +148,8 @@ const AdminPanel = () => {
                     onChange={handleInputChange}
                     className="border p-2 mr-4"
                 />
-                <button onClick={handleAddBoleta} className="bg-green-500 text-white p-2 rounded">
-                    Agregar Boleta
+                <button onClick={editingBoletaId ? handleAddBoleta : handleEditBoleta} className="bg-green-500 text-white p-2 rounded">
+                    {editingBoletaId ? 'Actualizar Boleta' : 'Agregar Boleta'}
                 </button>
             </div>
 

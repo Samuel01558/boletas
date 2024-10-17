@@ -2,8 +2,8 @@ const express = require('express');
 const path = require('path');
 const cors = require('cors');
 const connectDB = require('./database/initDB');
-const loginRoutes = require('./api/Login');
-const registerRoutes = require('./api/Register');
+const loginRoutes = require('./api/login');
+const registerRoutes = require('./api/register.js');
 const boletasRoutes = require('./api/boletas');
 const Evento = require('./model/Evento');
 const User = require('./model/User');  
@@ -35,6 +35,31 @@ app.get('/api/eventos', async (req, res) => {
         res.status(500).json({ message: 'Error fetching eventos', error: error.message });
     }
 });
+
+
+app.post('/api/register', async (req, res) => {
+    const { username, email, password } = req.body;
+
+    if (!username || !email || !password) {
+        return res.status(400).json({ message: 'Todos los campos son obligatorios' });
+    }
+
+    try {
+        const existingUser = await User.findOne({ username });  // Cambié Usuario a User
+        if (existingUser) {
+            return res.status(400).json({ message: 'El usuario ya existe' });
+        }
+
+        const newUser = new User({ username, email, password });  // Cambié Usuario a User
+        await newUser.save();
+        res.status(201).json({ message: 'Registro exitoso' });
+    } catch (error) {
+        console.error('Error al registrar el usuario:', error);
+        res.status(500).json({ message: 'Error en el servidor', error: error.message });
+    }
+});
+
+
 
 
 

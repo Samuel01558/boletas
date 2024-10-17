@@ -13,8 +13,7 @@ function App() {
 
   const handleLogin = async (username, password) => {
     try {
-        const response = await fetch('http://localhost:5001/api/login', { // Cambié la URL aquí
-            method: 'POST',
+        const response = await fetch('http://localhost:5001/api/login', { 
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ username, password }),
         });
@@ -23,7 +22,7 @@ function App() {
 
         if (response.ok) {
             setIsLoggedIn(true);
-            setUserRole(data.role);  // Asegúrate de que tu API devuelva el rol del usuario
+            setUserRole(data.role);  
         } else {
             alert('Credenciales incorrectas');
         }
@@ -35,24 +34,25 @@ function App() {
 
   
 
-  const handleRegister = (username, email, password) => {
-    fetch('http://localhost:5001/api/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, email, password }), // Asegúrate de que esto sea correcto
-    })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        return response.json();
-    })
-    .then(data => {
-        console.log(data); // Aquí puedes manejar la respuesta
-    })
-    .catch(error => {
-        console.error('Error al registrarse:', error);
-    });
+const handleRegister = async (username, email, password) => {
+  try {
+      const response = await fetch('http://localhost:5001/api/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, email, password }),
+      });
+
+      if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(`HTTP error! status: ${response.status}, message: ${errorData.message}`);
+      }
+
+      const data = await response.json();
+      console.log(data); 
+
+  } catch (error) {
+      console.error('Error al registrarse:', error);
+  }
 };
 
 

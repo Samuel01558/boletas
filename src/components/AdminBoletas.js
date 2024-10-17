@@ -7,145 +7,120 @@ const AdminBoletas = () => {
   const [description, setDescription] = useState('');
   const [boletas, setBoletas] = useState([]);
   const [editingBoleta, setEditingBoleta] = useState(null);
-
-  // Simulación de si el usuario es administrador (esto debería venir de autenticación)
-  const isAdmin = true; // En producción, esto debería depender de un token o un estado global
+  
+  // Estados para el inicio de sesión
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
-    const fetchBoletas = async () => {
-      const response = await fetch('http://localhost:5001/api/boletas');
-      const data = await response.json();
-      setBoletas(data);
-    };
+    if (isAdmin) {
+      fetchBoletas();
+    }
+  }, [isAdmin]);
+
+  const fetchBoletas = async () => {
+    const response = await fetch('http://localhost:5001/api/boletas');
+    const data = await response.json();
+    setBoletas(data);
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const method = editingBoleta ? 'PUT' : 'POST';
+    const url = editingBoleta ? `http://localhost:5001/api/boletas/${editingBoleta}` : 'http://localhost:5001/api/boletas';
+    
+    const newBoleta = { title, date, location, description };
+
+    const response = await fetch(url, {
+      method,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(newBoleta),
+    });
+
+    if (response.ok) {
+      fetchBoletas();
+      resetForm();
+    }
+  };
+
+  const resetForm = () => {
+    setTitle('');
+    setDate('');
+    setLocation('');
+    setDescription('');
+    setEditingBoleta(null);
+  };
+
+  const handleEdit = (boleta) => {
+    setTitle(boleta.title);
+    setDate(boleta.date);
+    setLocation(boleta.location);
+    setDescription(boleta.description);
+    setEditingBoleta(boleta._id);
+  };
+
+  const handleDelete = async (id) => {
+    await fetch(`http://localhost:5001/api/boletas/${id}`, { method: 'DELETE' });
     fetchBoletas();
-  }, []);
+  };
 
-  const handleAddBoleta = async () => {
-    try {
-      const newBoleta = { title, date, location, description };
-      const response = await fetch('http://localhost:5001/api/boletas', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(newBoleta),
-      });
-      const data = await response.json();
-      setBoletas([...boletas, data]);
-      setTitle('');
-      setDate('');
-      setLocation('');
-      setDescription('');
-    } catch (error) {
-      console.error('Error agregando boleta:', error);
+  const handleLogin = (e) => {
+    e.preventDefault();
+    // Validar las credenciales
+    if (username === 'admin' && password === 'tuContraseñaSegura') {
+      setIsAdmin(true);
+    } else {
+      alert('Credenciales incorrectas');
     }
   };
 
-  const handleEditBoleta = async (id) => {
-    try {
-      const updatedBoleta = { title, date, location, description };
-      const response = await fetch(`http://localhost:5001/api/boletas/${id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(updatedBoleta),
-      });
-      const data = await response.json();
-      setBoletas(boletas.map((boleta) => (boleta._id === id ? data : boleta)));
-      setEditingBoleta(null);
-    } catch (error) {
-      console.error('Error editando boleta:', error);
-    }
-  };
-
-  const handleDeleteBoleta = async (id) => {
-    try {
-      await fetch(`http://localhost:5001/api/boletas/${id}`, {
-        method: 'DELETE',
-      });
-      setBoletas(boletas.filter((boleta) => boleta._id !== id));
-    } catch (error) {
-      console.error('Error eliminando boleta:', error);
-    }
-  };
+  if (!isAdmin) {
+    return (
+      <div>
+        <h1>Iniciar Sesión</h1>
+        <form onSubmit={handleLogin}>
+          <input
+            type="text"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            placeholder="Usuario"
+            required
+          />
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="Contraseña"
+            required
+          />
+          <button type="submit">Iniciar Sesión</button>
+        </form>
+      </div>
+    );
+  }
 
   return (
-    <div className="admin-boletas-container p-6">
-      <h2 className="text-xl font-bold mb-4">Administrar Boletas</h2>
-
-      {isAdmin ? (
-        <div>
-          {/* Formulario para agregar o editar una boleta */}
-          <div className="boleta-form space-y-4">
-            <input
-              className="w-full p-2 border rounded-lg"
-              type="text"
-              placeholder="Título del Evento"
-              value={title}
-              onChange={e => setTitle(e.target.value)}
-            />
-            <input
-              className="w-full p-2 border rounded-lg"
-              type="date"
-              value={date}
-              onChange={e => setDate(e.target.value)}
-            />
-            <input
-              className="w-full p-2 border rounded-lg"
-              type="text"
-              placeholder="Ubicación"
-              value={location}
-              onChange={e => setLocation(e.target.value)}
-            />
-            <textarea
-              className="w-full p-2 border rounded-lg"
-              placeholder="Descripción del Evento"
-              value={description}
-              onChange={e => setDescription(e.target.value)}
-            />
-            <button
-              className="px-4 py-2 bg-blue-500 text-white rounded-lg"
-              onClick={editingBoleta ? () => handleEditBoleta(editingBoleta._id) : handleAddBoleta}
-            >
-              {editingBoleta ? 'Guardar Cambios' : 'Agregar Boleta'}
-            </button>
-          </div>
-
-          {/* Lista de boletas con opciones de editar y eliminar */}
-          <div className="boletas-list mt-8">
-            {boletas.map((boleta) => (
-              <div key={boleta._id} className="boleta-item border p-4 mb-4 rounded-lg">
-                <h3 className="font-bold">{boleta.title}</h3>
-                <p>{new Date(boleta.date).toLocaleDateString()} - {boleta.location}</p>
-                <p>{boleta.description}</p>
-                <div className="actions mt-4">
-                  <button
-                    className="px-4 py-2 bg-yellow-500 text-white rounded-lg mr-2"
-                    onClick={() => {
-                      setEditingBoleta(boleta);
-                      setTitle(boleta.title);
-                      setDate(boleta.date);
-                      setLocation(boleta.location);
-                      setDescription(boleta.description);
-                    }}
-                  >
-                    Editar
-                  </button>
-                  <button
-                    className="px-4 py-2 bg-red-500 text-white rounded-lg"
-                    onClick={() => handleDeleteBoleta(boleta._id)}
-                  >
-                    Eliminar
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      ) : (
-        <p>No tienes permiso para acceder a esta sección.</p>
-      )}
+    <div>
+      <h1>Administrar Boletas</h1>
+      <form onSubmit={handleSubmit}>
+        <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Título" required />
+        <input type="date" value={date} onChange={(e) => setDate(e.target.value)} required />
+        <input type="text" value={location} onChange={(e) => setLocation(e.target.value)} placeholder="Ubicación" required />
+        <textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Descripción" required></textarea>
+        <button type="submit">{editingBoleta ? 'Actualizar' : 'Agregar'}</button>
+      </form>
+      <ul>
+        {boletas.map((boleta) => (
+          <li key={boleta._id}>
+            {boleta.title} - {boleta.date} - {boleta.location}
+            <button onClick={() => handleEdit(boleta)}>Editar</button>
+            <button onClick={() => handleDelete(boleta._id)}>Eliminar</button>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 };
