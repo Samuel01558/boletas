@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const User = require('../model/User'); 
 
-
+// post request para verificar si este usuario existe
 router.post('/', async (req, res) => {
     const { username, password } = req.body;
 
