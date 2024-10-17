@@ -10,7 +10,14 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "bcrypt": "^5.1.1",
+    "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
-    "express": "^4.21.1"
+    "express": "^4.21.1",
+    "mongodb": "^6.9.0",
+    "mongoose": "^8.7.1"
+  },
+  "devDependencies": {
+    "@babel/plugin-transform-private-property-in-object": "^7.25.8"
   }
 }

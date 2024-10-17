@@ -11,23 +11,50 @@ function App() {
   const [isRegister, setIsRegister] = useState(false);
   const [userRole, setUserRole] = useState(''); 
 
-  const handleLogin = (username, password) => {
-    
-    if (username === 'admin' && password === 'admin123') {
-      setIsLoggedIn(true);
-      setUserRole('admin');
-    } else if (username === 'user' && password === 'user123') {
-      setIsLoggedIn(true);
-      setUserRole('user');
-    } else {
-      alert('Credenciales incorrectas');
+  const handleLogin = async (username, password) => {
+    try {
+        const response = await fetch('http://localhost:5001/api/login', { // Cambié la URL aquí
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password }),
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            setIsLoggedIn(true);
+            setUserRole(data.role);  // Asegúrate de que tu API devuelva el rol del usuario
+        } else {
+            alert('Credenciales incorrectas');
+        }
+    } catch (error) {
+        console.error('Error al iniciar sesión:', error);
+        alert('Error al conectar con el servidor');
     }
-  };
+};
+
+  
 
   const handleRegister = (username, email, password) => {
-    alert(`Usuario ${username} registrado con éxito`);
-    setIsRegister(false); 
-  };
+    fetch('http://localhost:5001/api/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, email, password }), // Asegúrate de que esto sea correcto
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log(data); // Aquí puedes manejar la respuesta
+    })
+    .catch(error => {
+        console.error('Error al registrarse:', error);
+    });
+};
+
 
   const handleLogout = () => {
     setIsLoggedIn(false);
