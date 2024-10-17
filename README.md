@@ -1,71 +1,149 @@
-# Getting Started with Create React App
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
-## Available Scripts
+# Eventos App
 
-In the project directory, you can run:
+Este proyecto es una aplicación web para gestionar y visualizar eventos de conciertos. Los administradores pueden agregar, editar y eliminar eventos, mientras que los usuarios pueden ver los eventos disponibles. La aplicación está construida con **React** para el front-end y **Node.js** para el back-end.
 
-### `npm start`
+## Tabla de Contenidos
+- [Instalación](#instalación)
+- [Uso](#uso)
+- [Estructura del Proyecto](#estructura-del-proyecto)
+- [Características](#características)
+- [Contribución](#contribución)
+- [Licencia](#licencia)
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+---
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## Instalación
 
-### `npm test`
+### Prerrequisitos
+Asegúrate de tener instalado lo siguiente:
+- **Node.js** (v14 o superior)
+- **npm** (normalmente viene con Node.js)
+- **MongoDB** (para la base de datos)
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+### Pasos de instalación
+1. Clona el repositorio desde GitHub:
+   ```bash
+   git clone https://github.com/tu-usuario/eventos-app.git
+   ```
 
-### `npm run build`
+2. Navega al directorio del proyecto:
+   ```bash
+   cd eventos-app
+   ```
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+3. Instala las dependencias del servidor y del cliente:
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+   - Instalar dependencias del **back-end** (servidor):
+     ```bash
+     cd backend
+     npm install
+     ```
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+   - Instalar dependencias del **front-end** (cliente):
+     ```bash
+     cd ../frontend
+     npm install
+     ```
 
-### `npm run eject`
+### Configuración de Variables de Entorno
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+Crea un archivo `.env` en la carpeta `backend` y agrega las siguientes variables de entorno:
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+```bash
+PORT=5001
+MONGODB_URI=mongodb://localhost:27017/eventosdb
+JWT_SECRET=tu-secreto
+```
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+Estas variables controlan el puerto en el que se ejecutará el servidor, la conexión a la base de datos MongoDB y el secreto para autenticación JWT (si se usa).
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+### Ejecución del proyecto
 
-## Learn More
+1. Inicia el servidor **back-end**:
+   ```bash
+   cd backend
+   npm start
+   ```
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+2. Inicia la aplicación **front-end**:
+   ```bash
+   cd ../frontend
+   npm start
+   ```
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+La aplicación estará disponible en `http://localhost:3000` y el servidor en `http://localhost:5001`.
 
-### Code Splitting
+---
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+## Uso
 
-### Analyzing the Bundle Size
+### Modo Administrador
+1. **Iniciar sesión** como administrador para acceder al **Panel de Administración** donde puedes agregar, editar o eliminar eventos.
+   
+2. Desde el panel, puedes gestionar los eventos añadiendo información como el título, descripción, fecha y precio del evento.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+### Modo Usuario
+1. Los **usuarios normales** pueden ver los eventos disponibles con detalles como el título, fecha, y precio, pero no pueden editarlos ni eliminarlos.
 
-### Making a Progressive Web App
+---
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+## Estructura del Proyecto
 
-### Advanced Configuration
+```
+eventos-app/
+│
+├── backend/                # Carpeta del servidor
+│   ├── models/             # Modelos de datos (Usuario, Evento)
+│   ├── routes/             # Definición de las rutas (login, eventos)
+│   ├── server.js           # Punto de entrada del servidor
+│   ├── controllers/        # Lógica de negocio para eventos y usuarios
+│   └── package.json        # Dependencias del servidor
+│
+├── frontend/               # Carpeta del cliente
+│   ├── src/
+│   │   ├── components/     # Componentes de React (AdminBoletas, UserBoletas, etc.)
+│   │   ├── pages/          # Páginas principales (Home, Login, Register)
+│   │   ├── App.js          # Componente principal de la aplicación
+│   │   ├── index.js        # Punto de entrada del cliente
+│   └── package.json        # Dependencias del cliente
+│
+├── README.md               # Documentación del proyecto
+└── .gitignore              # Archivos a ignorar en Git
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+---
 
-### Deployment
+## Características
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+### Administradores:
+- Crear, editar y eliminar eventos.
+- Ver una lista de eventos en formato amigable.
+- Manejar los eventos con campos: título, descripción, fecha y precio.
 
-### `npm run build` fails to minify
+### Usuarios:
+- Ver todos los eventos disponibles en el sistema.
+- Sin acceso a la modificación de eventos.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
-# boletas
+### Otras características:
+- **Diseño responsivo**: Funciona bien en dispositivos móviles y de escritorio.
+- **Sistema de login**: Admin y usuarios acceden mediante el mismo formulario de login (sin autenticación avanzada por ahora).
+
+---
+
+## Contribución
+
+Si deseas contribuir a este proyecto, sigue los siguientes pasos:
+
+1. Haz un **fork** del proyecto.
+2. Crea una nueva rama con tu funcionalidad (`git checkout -b mi-nueva-funcionalidad`).
+3. Realiza tus cambios y haz un commit (`git commit -am 'Agrega nueva funcionalidad'`).
+4. Sube la rama (`git push origin mi-nueva-funcionalidad`).
+5. Crea un **pull request** en GitHub.
+
+---
+
+## Licencia
+
+Este proyecto está licenciado bajo la **MIT License**. Puedes consultar el archivo `LICENSE` para más detalles.
