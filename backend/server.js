@@ -7,6 +7,7 @@ const registerRoutes = require('./api/register.js');
 const boletasRoutes = require('./api/boletas');
 const Evento = require('./model/Evento');
 const User = require('./model/User');  
+const eventsRoutes = require("./model/Evento.js")
 
 const app = express();
 const PORT = process.env.PORT || 5001;
@@ -24,6 +25,7 @@ connectDB()
 app.use('/api/login', loginRoutes);
 app.use('/api/register', registerRoutes);
 app.use('/api/boletas', boletasRoutes);
+app.use('/api/events', eventsRoutes); 
 
 
 app.get('/api/eventos', async (req, res) => {

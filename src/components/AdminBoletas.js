@@ -1,128 +1,133 @@
 import React, { useState, useEffect } from 'react';
 
 const AdminBoletas = () => {
-  const [title, setTitle] = useState('');
-  const [date, setDate] = useState('');
-  const [location, setLocation] = useState('');
-  const [description, setDescription] = useState('');
-  const [boletas, setBoletas] = useState([]);
-  const [editingBoleta, setEditingBoleta] = useState(null);
-  
-  // Estados para el inicio de sesión
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [isAdmin, setIsAdmin] = useState(false);
+    const [eventos, setEventos] = useState([]);
+    const [nombre, setNombre] = useState('');
+    const [fecha, setFecha] = useState('');
+    const [idEventoEdit, setIdEventoEdit] = useState(null); // Para editar un evento
 
-  useEffect(() => {
-    if (isAdmin) {
-      fetchBoletas();
-    }
-  }, [isAdmin]);
+    useEffect(() => {
+        // Cargar eventos al montar el componente
+        fetchEventos();
+    }, []);
 
-  const fetchBoletas = async () => {
-    const response = await fetch('http://localhost:5001/api/boletas');
-    const data = await response.json();
-    setBoletas(data);
-  };
+    const fetchEventos = async () => {
+        try {
+            const response = await fetch('http://localhost:5001/api/eventos');
+            const data = await response.json();
+            setEventos(data);
+        } catch (error) {
+            console.error('Error al cargar eventos:', error);
+        }
+    };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const method = editingBoleta ? 'PUT' : 'POST';
-    const url = editingBoleta ? `http://localhost:5001/api/boletas/${editingBoleta}` : 'http://localhost:5001/api/boletas';
-    
-    const newBoleta = { title, date, location, description };
+    const agregarEvento = async (e) => {
+        e.preventDefault();
+        try {
+            const response = await fetch('http://localhost:5001/api/eventos', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ nombre, fecha }),
+            });
 
-    const response = await fetch(url, {
-      method,
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(newBoleta),
-    });
+            if (!response.ok) {
+                throw new Error('Error al agregar el evento');
+            }
 
-    if (response.ok) {
-      fetchBoletas();
-      resetForm();
-    }
-  };
+            setNombre('');
+            setFecha('');
+            fetchEventos(); // Recargar eventos después de agregar uno
+        } catch (error) {
+            console.error('Error al agregar evento:', error);
+        }
+    };
 
-  const resetForm = () => {
-    setTitle('');
-    setDate('');
-    setLocation('');
-    setDescription('');
-    setEditingBoleta(null);
-  };
+    const editarEvento = (evento) => {
+        setIdEventoEdit(evento._id); // Guardar el ID del evento que se está editando
+        setNombre(evento.nombre);
+        setFecha(evento.fecha);
+    };
 
-  const handleEdit = (boleta) => {
-    setTitle(boleta.title);
-    setDate(boleta.date);
-    setLocation(boleta.location);
-    setDescription(boleta.description);
-    setEditingBoleta(boleta._id);
-  };
+    const actualizarEvento = async (e) => {
+        e.preventDefault();
+        try {
+            const response = await fetch(`http://localhost:5001/api/eventos/${idEventoEdit}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ nombre, fecha }),
+            });
 
-  const handleDelete = async (id) => {
-    await fetch(`http://localhost:5001/api/boletas/${id}`, { method: 'DELETE' });
-    fetchBoletas();
-  };
+            if (!response.ok) {
+                throw new Error('Error al actualizar el evento');
+            }
 
-  const handleLogin = (e) => {
-    e.preventDefault();
-    // Validar las credenciales
-    if (username === 'admin' && password === 'tuContraseñaSegura') {
-      setIsAdmin(true);
-    } else {
-      alert('Credenciales incorrectas');
-    }
-  };
+            setIdEventoEdit(null);
+            setNombre('');
+            setFecha('');
+            fetchEventos(); // Recargar eventos después de actualizar uno
+        } catch (error) {
+            console.error('Error al actualizar evento:', error);
+        }
+    };
 
-  if (!isAdmin) {
+    const eliminarEvento = async (id) => {
+        if (window.confirm('¿Estás seguro de que deseas eliminar este evento?')) {
+            try {
+                const response = await fetch(`http://localhost:5001/api/eventos/${id}`, {
+                    method: 'DELETE',
+                });
+
+                if (!response.ok) {
+                    throw new Error('Error al eliminar el evento');
+                }
+
+                fetchEventos(); // Recargar eventos después de eliminar uno
+            } catch (error) {
+                console.error('Error al eliminar evento:', error);
+            }
+        }
+    };
+
     return (
-      <div>
-        <h1>Iniciar Sesión</h1>
-        <form onSubmit={handleLogin}>
-          <input
-            type="text"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            placeholder="Usuario"
-            required
-          />
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="Contraseña"
-            required
-          />
-          <button type="submit">Iniciar Sesión</button>
-        </form>
-      </div>
+        <div>
+            <h3 className="text-xl mb-4">Gestión de Eventos</h3>
+            <form onSubmit={idEventoEdit ? actualizarEvento : agregarEvento} className="mb-4">
+                <input
+                    type="text"
+                    placeholder="Nombre del evento"
+                    value={nombre}
+                    onChange={(e) => setNombre(e.target.value)}
+                    required
+                    className="border p-2 rounded mr-2"
+                />
+                <input
+                    type="date"
+                    value={fecha}
+                    onChange={(e) => setFecha(e.target.value)}
+                    required
+                    className="border p-2 rounded mr-2"
+                />
+                <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded-lg">
+                    {idEventoEdit ? 'Actualizar Evento' : 'Agregar Evento'}
+                </button>
+            </form>
+            <ul>
+                {eventos.map((evento) => (
+                    <li key={evento._id} className="flex justify-between items-center mb-2">
+                        <span>{evento.nombre} - {new Date(evento.fecha).toLocaleDateString()}</span>
+                        <div>
+                            <button onClick={() => editarEvento(evento)} className="bg-yellow-500 text-white px-2 py-1 rounded-lg mr-2">
+                                Editar
+                            </button>
+                            <button onClick={() => eliminarEvento(evento._id)} className="bg-red-500 text-white px-2 py-1 rounded-lg">
+                                Eliminar
+                            </button>
+                        </div>
+                    </li>
+                ))}
+            </ul>
+        </div>
     );
-  }
-
-  return (
-    <div>
-      <h1>Administrar Boletas</h1>
-      <form onSubmit={handleSubmit}>
-        <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Título" required />
-        <input type="date" value={date} onChange={(e) => setDate(e.target.value)} required />
-        <input type="text" value={location} onChange={(e) => setLocation(e.target.value)} placeholder="Ubicación" required />
-        <textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Descripción" required></textarea>
-        <button type="submit">{editingBoleta ? 'Actualizar' : 'Agregar'}</button>
-      </form>
-      <ul>
-        {boletas.map((boleta) => (
-          <li key={boleta._id}>
-            {boleta.title} - {boleta.date} - {boleta.location}
-            <button onClick={() => handleEdit(boleta)}>Editar</button>
-            <button onClick={() => handleDelete(boleta._id)}>Eliminar</button>
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
 };
 
 export default AdminBoletas;
